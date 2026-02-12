@@ -59,4 +59,25 @@ public class SecurityUtils {
         return new String(decryptedBytes);
     }
     
+    /**
+     * Converts a SecretKey to a Base64 encoded string for transmission.
+     * 
+     * @param key The SecretKey to encode
+     * @return Base64 encoded string representation of the key
+     */
+    public static String keyToString(SecretKey key) {
+        return Base64.getEncoder().encodeToString(key.getEncoded());
+    }
+    
+    /**
+     * Converts a Base64 encoded string back to a SecretKey.
+     * 
+     * @param keyString The Base64 encoded key string
+     * @return The reconstructed SecretKey
+     */
+    public static SecretKey stringToKey(String keyString) {
+        byte[] decodedKey = Base64.getDecoder().decode(keyString);
+        return new SecretKeySpec(decodedKey, 0, decodedKey.length, ALGORITHM);
+    }
+    
 }

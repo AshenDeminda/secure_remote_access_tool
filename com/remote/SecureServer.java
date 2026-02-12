@@ -71,6 +71,10 @@ public class SecureServer {
                     new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 
+                // Send encryption key to client (Base64 encoded)
+                String keyString = SecurityUtils.keyToString(key);
+                out.println(keyString);
+                
                 // Authentication handshake
                 try {
                     // Receive encrypted username and password
@@ -108,9 +112,15 @@ public class SecureServer {
                 }
                 
                 // Send welcome message (encrypted)
-                String welcomeMsg = SecurityUtils.encrypt(
-                    "Welcome to Secure Remote Access Server", key);
-                out.println(welcomeMsg);
+                try {
+                    String welcomeMsg = SecurityUtils.encrypt(
+                        "Welcome to Secure Remote Access Server", key);
+                    out.println(welcomeMsg);
+                } catch (Exception e) {
+                    System.err.println("Error sending welcome message: " + e.getMessage());
+                    socket.close();
+                    return;
+                }
                 
                 // Process client commands
                 String encryptedCommand;
@@ -128,9 +138,13 @@ public class SecureServer {
                         out.println(encryptedResult);
                         
                     } catch (Exception e) {
-                        String errorMsg = "Error processing command: " + e.getMessage();
-                        String encryptedError = SecurityUtils.encrypt(errorMsg, key);
-                        out.println(encryptedError);
+                        try {
+                            String errorMsg = "Error processing command: " + e.getMessage();
+                            String encryptedError = SecurityUtils.encrypt(errorMsg, key);
+                            out.println(encryptedError);
+                        } catch (Exception encryptException) {
+                            System.err.println("Error encrypting error message: " + encryptException.getMessage());
+                        }
                     }
                 }
                 

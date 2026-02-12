@@ -23,10 +23,6 @@ public class SecureClient {
         System.out.println("\t\t===========================\n\n");
         
         try {
-            // Generate encryption key (must match server's key in production)
-            SecretKey secretKey = SecurityUtils.generateKey();
-            System.out.println("Encryption key generated successfully.");
-            
             // Connect to server
             InetAddress address = InetAddress.getByName("127.0.0.1");
             Socket socket = new Socket(address, port);
@@ -38,6 +34,12 @@ public class SecureClient {
                     new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 Scanner scannerInput = new Scanner(System.in);
+                
+                // Receive encryption key from server
+                String keyString = in.readLine();
+                SecretKey secretKey = SecurityUtils.stringToKey(keyString);
+                System.out.println("Encryption key received from server.");
+                System.out.println();
                 
                 // Authentication handshake
                 System.out.println("=== Authentication Required ===");
