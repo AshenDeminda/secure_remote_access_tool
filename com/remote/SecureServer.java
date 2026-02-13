@@ -162,6 +162,7 @@ public class SecureServer {
         
         /**
          * Executes a system command using ProcessBuilder.
+         * Handles both standalone executables and shell built-in commands.
          * 
          * @param command The command string to execute
          * @return The output of the command execution
@@ -170,11 +171,18 @@ public class SecureServer {
             StringBuilder output = new StringBuilder();
             
             try {
-                // Parse command for ProcessBuilder (split by spaces)
-                String[] cmdArray = command.split("\\s+");
-                ProcessBuilder processBuilder = new ProcessBuilder(cmdArray);
-                processBuilder.redirectErrorStream(true);
+                ProcessBuilder processBuilder;
                 
+                // Check if running on Windows to handle shell built-ins like 'dir'
+                if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                    // Windows: use cmd /c to handle built-in commands
+                    processBuilder = new ProcessBuilder("cmd", "/c", command);
+                } else {
+                    // Linux/Mac: use sh -c to handle built-in commands like 'ls'
+                    processBuilder = new ProcessBuilder("sh", "-c", command);
+                }
+                
+                processBuilder.redirectErrorStream(true);
                 Process process = processBuilder.start();
                 
                 // Read command output
