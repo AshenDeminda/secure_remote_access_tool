@@ -46,21 +46,20 @@ public class SecureServer {
     private static final String ADMIN_SALT = "hSKj1xCx0ipcA8zcVVZBWw==";
 
     public static void main(String[] args) {
-        System.out.println("\t\t Secure Remote Access Server");
-        System.out.println("\t\t===========================\n\n");
+        TerminalUI.printServerBanner();
         
         try {
             // Generate RSA key pair (public key sent to clients, private key stays here)
             rsaKeyPair = SecurityUtils.generateRSAKeyPair();
-            System.out.println("RSA-2048 key pair generated successfully.");
+            TerminalUI.printLog("System", "RSA-2048 key pair generated successfully.");
             
             ServerSocket serverSocket = new ServerSocket(port);
-            System.out.println("Server started on port " + port);
+            TerminalUI.printLog("Network", "Server started on port " + port);
             
             try {
                 while (true) {
                     Socket socket = serverSocket.accept();
-                    System.out.println("Client connected: " + socket.getInetAddress());
+                    TerminalUI.printLog("Network", "Client connected: " + socket.getInetAddress());
                     
                     // Handle each client in a separate thread
                     // Each client will negotiate its own unique AES session key
