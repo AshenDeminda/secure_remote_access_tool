@@ -22,9 +22,23 @@ public class SecureClient {
     public static void main(String[] args) {
         TerminalUI.printClientBanner();
         
+        String targetIp = "127.0.0.1";
+        String prefilledUsername = null;
+        
+        if (args.length > 0) {
+            String target = args[0];
+            if (target.contains("@")) {
+                String[] parts = target.split("@", 2);
+                prefilledUsername = parts[0];
+                targetIp = parts[1];
+            } else {
+                targetIp = target;
+            }
+        }
+        
         try {
             // Connect to server
-            InetAddress address = InetAddress.getByName("127.0.0.1");
+            InetAddress address = InetAddress.getByName(targetIp);
             TerminalUI.showLoading("Establishing TCP connection...", 800);
             Socket socket = new Socket(address, port);
             TerminalUI.printSuccess("Connected to server at " + address + ":" + port);
@@ -69,10 +83,16 @@ public class SecureClient {
                 
                 // Authentication handshake
                 TerminalUI.printInfo("=== Authentication Required ===");
-                TerminalUI.printPrompt("Enter Username: ");
-                String username = scannerInput.nextLine();
+                String username;
+                if (prefilledUsername != null && !prefilledUsername.trim().isEmpty()) {
+                    username = prefilledUsername;
+                    TerminalUI.printInfo("Username: " + username + " (from CLI)");
+                } else {
+                    TerminalUI.printPrompt("Enter Username: ");
+                    username = scannerInput.nextLine();
+                }
                 
-                TerminalUI.printPrompt("Enter Password: ");
+                TerminalUI.printPrompt("Enter Password for " + username + ": ");
                 // Now using the secure password reader
                 String password = TerminalUI.readPassword();
                 
